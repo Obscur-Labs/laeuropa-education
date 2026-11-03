@@ -1,0 +1,493 @@
+[
+    {
+        "code": "gb",
+        "name": "United Kingdom",
+        "region": "British Isles",
+        "lang": "English",
+        "intake": "Sep · Jan · May",
+        "popular": true,
+        "blurb": "One-year Master's degrees, world-ranked universities and the Graduate Route for post-study work.",
+        "tags": [
+            "Business",
+            "Computing",
+            "Health",
+            "Law"
+        ]
+    },
+    {
+        "code": "ie",
+        "name": "Ireland",
+        "region": "British Isles",
+        "lang": "English",
+        "intake": "Sep · Jan",
+        "popular": true,
+        "blurb": "English-speaking EU hub for tech and pharma, with many global companies headquartered in Dublin.",
+        "tags": [
+            "Data Science",
+            "Pharma",
+            "Finance"
+        ]
+    },
+    {
+        "code": "de",
+        "name": "Germany",
+        "region": "Central Europe",
+        "lang": "English & German",
+        "intake": "Winter (Oct) · Summer (Apr)",
+        "popular": true,
+        "blurb": "Public universities with low or no tuition, and a reputation for engineering and research.",
+        "tags": [
+            "Engineering",
+            "Automotive",
+            "Research"
+        ]
+    },
+    {
+        "code": "fr",
+        "name": "France",
+        "region": "Western Europe",
+        "lang": "English & French",
+        "intake": "Sep · Jan",
+        "popular": true,
+        "blurb": "Renowned business schools, affordable public universities and a world-famous culture.",
+        "tags": [
+            "Business",
+            "Fashion",
+            "Hospitality"
+        ]
+    },
+    {
+        "code": "it",
+        "name": "Italy",
+        "region": "Southern Europe",
+        "lang": "English & Italian",
+        "intake": "Sep · Feb",
+        "popular": true,
+        "blurb": "Historic universities, excellence in design and architecture, and regional scholarships.",
+        "tags": [
+            "Design",
+            "Architecture",
+            "Medicine"
+        ]
+    },
+    {
+        "code": "nl",
+        "name": "Netherlands",
+        "region": "Western Europe",
+        "lang": "English",
+        "intake": "Sep · Feb",
+        "popular": true,
+        "blurb": "Hundreds of English-taught programmes and an innovative, truly international campus life.",
+        "tags": [
+            "Logistics",
+            "Agri-tech",
+            "Business"
+        ]
+    },
+    {
+        "code": "es",
+        "name": "Spain",
+        "region": "Southern Europe",
+        "lang": "English & Spanish",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "Vibrant cities, strong business and tourism programmes and an excellent quality of life.",
+        "tags": [
+            "MBA",
+            "Tourism",
+            "Sports Management"
+        ]
+    },
+    {
+        "code": "pl",
+        "name": "Poland",
+        "region": "Central Europe",
+        "lang": "English & Polish",
+        "intake": "Oct · Feb",
+        "popular": true,
+        "blurb": "Affordable tuition and living costs with degrees recognised across the European Union.",
+        "tags": [
+            "IT",
+            "Medicine",
+            "Engineering"
+        ]
+    },
+    {
+        "code": "lt",
+        "name": "Lithuania",
+        "region": "Baltic States",
+        "lang": "English & Lithuanian",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "A budget-friendly Baltic destination with a growing list of English-taught degrees.",
+        "tags": [
+            "IT",
+            "Business",
+            "Aviation"
+        ]
+    },
+    {
+        "code": "lv",
+        "name": "Latvia",
+        "region": "Baltic States",
+        "lang": "English & Latvian",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "Affordable student life in Riga, one of Europe's most charming capitals.",
+        "tags": [
+            "Management",
+            "IT",
+            "Medicine"
+        ]
+    },
+    {
+        "code": "mt",
+        "name": "Malta",
+        "region": "Southern Europe",
+        "lang": "English",
+        "intake": "Oct · Feb",
+        "popular": true,
+        "blurb": "An English-speaking Mediterranean island inside the EU, ideal for hospitality and business.",
+        "tags": [
+            "Hospitality",
+            "Business",
+            "iGaming"
+        ]
+    },
+    {
+        "code": "se",
+        "name": "Sweden",
+        "region": "Nordic",
+        "lang": "English & Swedish",
+        "intake": "Aug · Jan",
+        "popular": false,
+        "blurb": "Innovation-led, student-centred teaching with a strong focus on sustainability.",
+        "tags": [
+            "Sustainability",
+            "Engineering",
+            "Design"
+        ]
+    },
+    {
+        "code": "fi",
+        "name": "Finland",
+        "region": "Nordic",
+        "lang": "English & Finnish",
+        "intake": "Aug · Jan",
+        "popular": false,
+        "blurb": "A world-admired education system in one of the safest, happiest countries on earth.",
+        "tags": [
+            "Education",
+            "Tech",
+            "Nursing"
+        ]
+    },
+    {
+        "code": "hu",
+        "name": "Hungary",
+        "region": "Central Europe",
+        "lang": "English & Hungarian",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "Well-known medical and engineering programmes, plus the Stipendium Hungaricum scholarship.",
+        "tags": [
+            "Medicine",
+            "Engineering",
+            "Pharmacy"
+        ]
+    },
+    {
+        "code": "at",
+        "name": "Austria",
+        "region": "Central Europe",
+        "lang": "English & German",
+        "intake": "Oct · Mar",
+        "popular": false,
+        "blurb": "High-quality public universities in the heart of Europe, with outstanding living standards.",
+        "tags": [
+            "Music",
+            "Engineering",
+            "Economics"
+        ]
+    },
+    {
+        "code": "ch",
+        "name": "Switzerland",
+        "region": "Central Europe",
+        "lang": "English, German & French",
+        "intake": "Sep · Jan · Apr",
+        "popular": false,
+        "blurb": "The home of hospitality education, with world-class hotel-management institutes.",
+        "tags": [
+            "Hotel Management",
+            "Finance",
+            "Culinary"
+        ]
+    },
+    {
+        "code": "cz",
+        "name": "Czech Republic",
+        "region": "Central Europe",
+        "lang": "English & Czech",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "Central location, affordable living and respected technical universities in Prague and Brno.",
+        "tags": [
+            "Engineering",
+            "IT",
+            "Medicine"
+        ]
+    },
+    {
+        "code": "cy",
+        "name": "Cyprus",
+        "region": "Southern Europe",
+        "lang": "English & Greek",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "English widely spoken, a sunny Mediterranean lifestyle and affordable tuition.",
+        "tags": [
+            "Hospitality",
+            "Business",
+            "Computing"
+        ]
+    },
+    {
+        "code": "pt",
+        "name": "Portugal",
+        "region": "Southern Europe",
+        "lang": "English & Portuguese",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "A welcoming culture, affordable living and a fast-growing tech scene in Lisbon and Porto.",
+        "tags": [
+            "Tech",
+            "Tourism",
+            "Business"
+        ]
+    },
+    {
+        "code": "be",
+        "name": "Belgium",
+        "region": "Western Europe",
+        "lang": "English, French & Dutch",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "Study at the heart of the EU in Brussels — strong in politics, business and research.",
+        "tags": [
+            "International Relations",
+            "Business",
+            "Research"
+        ]
+    },
+    {
+        "code": "dk",
+        "name": "Denmark",
+        "region": "Nordic",
+        "lang": "English & Danish",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "Project-based, collaborative teaching with a strong focus on design, sustainability and innovation.",
+        "tags": [
+            "Design",
+            "Sustainability",
+            "Business"
+        ]
+    },
+    {
+        "code": "no",
+        "name": "Norway",
+        "region": "Nordic",
+        "lang": "English & Norwegian",
+        "intake": "Aug · Jan",
+        "popular": false,
+        "blurb": "Stunning nature, a high quality of life and research-driven public universities.",
+        "tags": [
+            "Energy",
+            "Marine Science",
+            "Engineering"
+        ]
+    },
+    {
+        "code": "is",
+        "name": "Iceland",
+        "region": "Nordic",
+        "lang": "English & Icelandic",
+        "intake": "Aug · Jan",
+        "popular": false,
+        "blurb": "Small, safe and spectacular — known for research in renewable energy and earth sciences.",
+        "tags": [
+            "Renewable Energy",
+            "Geology",
+            "Environment"
+        ]
+    },
+    {
+        "code": "ee",
+        "name": "Estonia",
+        "region": "Baltic States",
+        "lang": "English & Estonian",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "Europe's digital pioneer — a hub for IT, start-ups and e-governance.",
+        "tags": [
+            "IT",
+            "Cyber Security",
+            "Business"
+        ]
+    },
+    {
+        "code": "lu",
+        "name": "Luxembourg",
+        "region": "Western Europe",
+        "lang": "English, French & German",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "A multilingual, international financial centre at the heart of Europe.",
+        "tags": [
+            "Finance",
+            "Law",
+            "Computer Science"
+        ]
+    },
+    {
+        "code": "li",
+        "name": "Liechtenstein",
+        "region": "Central Europe",
+        "lang": "English & German",
+        "intake": "Sep",
+        "popular": false,
+        "blurb": "A small Alpine country with a specialised university focused on architecture, business and finance.",
+        "tags": [
+            "Architecture",
+            "Finance",
+            "Entrepreneurship"
+        ]
+    },
+    {
+        "code": "sk",
+        "name": "Slovakia",
+        "region": "Central Europe",
+        "lang": "English & Slovak",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "A central location, affordable living and established medical and technical faculties.",
+        "tags": [
+            "Medicine",
+            "Engineering",
+            "IT"
+        ]
+    },
+    {
+        "code": "si",
+        "name": "Slovenia",
+        "region": "Central Europe",
+        "lang": "English & Slovene",
+        "intake": "Oct · Feb",
+        "popular": false,
+        "blurb": "Green, safe and compact — quality public universities between the Alps and the Adriatic.",
+        "tags": [
+            "Engineering",
+            "Business",
+            "Life Sciences"
+        ]
+    },
+    {
+        "code": "gr",
+        "name": "Greece",
+        "region": "Southern Europe",
+        "lang": "English & Greek",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "A Mediterranean lifestyle, a rich academic heritage and a growing number of English-taught programmes.",
+        "tags": [
+            "Shipping",
+            "Tourism",
+            "Archaeology"
+        ]
+    },
+    {
+        "code": "hr",
+        "name": "Croatia",
+        "region": "South-East Europe",
+        "lang": "English & Croatian",
+        "intake": "Oct · Feb",
+        "popular": false,
+        "blurb": "The Adriatic coast, historic cities and affordable study options in Zagreb, Split and Rijeka.",
+        "tags": [
+            "Medicine",
+            "Tourism",
+            "Economics"
+        ]
+    },
+    {
+        "code": "ro",
+        "name": "Romania",
+        "region": "South-East Europe",
+        "lang": "English & Romanian",
+        "intake": "Oct · Feb",
+        "popular": false,
+        "blurb": "Popular for English-taught medicine and engineering, with affordable fees and living costs.",
+        "tags": [
+            "Medicine",
+            "Engineering",
+            "IT"
+        ]
+    },
+    {
+        "code": "bg",
+        "name": "Bulgaria",
+        "region": "South-East Europe",
+        "lang": "English & Bulgarian",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "Affordable tuition and living costs, with long-established English-taught medical programmes.",
+        "tags": [
+            "Medicine",
+            "Dentistry",
+            "Business"
+        ]
+    },
+    {
+        "code": "rs",
+        "name": "Serbia",
+        "region": "South-East Europe",
+        "lang": "English & Serbian",
+        "intake": "Oct · Feb",
+        "popular": false,
+        "blurb": "An affordable Balkan destination with lively student life in Belgrade and Novi Sad.",
+        "tags": [
+            "IT",
+            "Engineering",
+            "Arts"
+        ]
+    },
+    {
+        "code": "mk",
+        "name": "North Macedonia",
+        "region": "South-East Europe",
+        "lang": "English & Macedonian",
+        "intake": "Oct · Feb",
+        "popular": false,
+        "blurb": "Low tuition and living costs, with a growing number of English-taught programmes in Skopje.",
+        "tags": [
+            "Medicine",
+            "IT",
+            "Business"
+        ]
+    },
+    {
+        "code": "tr",
+        "name": "Türkiye",
+        "region": "South-East Europe",
+        "lang": "English & Turkish",
+        "intake": "Sep · Feb",
+        "popular": false,
+        "blurb": "A bridge between Europe and Asia, with modern universities and many English-taught programmes.",
+        "tags": [
+            "Engineering",
+            "Medicine",
+            "Architecture"
+        ]
+    }
+]
