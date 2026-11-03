@@ -44,3 +44,7 @@ next-env.d.ts
 /.local-data
 
 !.env.example
+
+# firebase cli
+.firebase/
+firebase-debug.log*

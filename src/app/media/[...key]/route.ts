@@ -2,7 +2,7 @@ import { isMediaKey, readLocalMedia, storeMode } from "@/lib/store";
 
 /**
  * Serves uploaded files during LOCAL development only.
- * In production (Supabase) uploads are served straight from Supabase Storage, so this returns 404.
+ * In production uploads are served straight from Cloudinary, so this returns 404.
  */
 export async function GET(_req: Request, ctx: { params: Promise<{ key: string[] }> }) {
   const { key } = await ctx.params;

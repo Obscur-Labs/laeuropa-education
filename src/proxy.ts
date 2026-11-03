@@ -30,15 +30,15 @@ export function proxy(request: NextRequest) {
 
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const isDev = process.env.NODE_ENV === "development";
-  let supabase = "";
-  try { supabase = process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).origin : ""; } catch { supabase = ""; }
+  // Uploaded photos/PDFs are served from Cloudinary
+  const media = process.env.CLOUDINARY_URL ? "https://res.cloudinary.com" : "";
 
   const csp = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www-cdn.icef.com${isDev ? " 'unsafe-eval'" : ""}`,
     // React style={{}} props and the rich-text editor need inline style attributes (no script risk)
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob: ${supabase} https://icef-api-production.s3.eu-central-1.amazonaws.com`,
+    `img-src 'self' data: blob: ${media} https://icef-api-production.s3.eu-central-1.amazonaws.com`,
     "font-src 'self'",
     `connect-src 'self' https://api2.icef.com${isDev ? " ws:" : ""}`,
     "frame-src https://www.google.com https://maps.google.com",

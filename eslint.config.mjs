@@ -10,7 +10,7 @@ const eslintConfig = defineConfig([
       // Pages are deliberately linked with plain <a> (full page loads): the scroll/lightbox effects in
       // SiteEffects bind once per page load, and every navigation gets a fresh CSP nonce.
       "@next/next/no-html-link-for-pages": "off",
-      // Images come from Supabase Storage / static files and are already resized to WebP on upload.
+      // Images come from Cloudinary / static files and are already resized to WebP on upload.
       "@next/next/no-img-element": "off",
     },
   },

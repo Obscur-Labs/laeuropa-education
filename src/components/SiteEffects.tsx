@@ -100,7 +100,7 @@ export default function SiteEffects() {
       const allowed = (u?: string) => {
         if (!u) return false;
         if (/^\/(certificates|media)\/[\w/.-]+$/.test(u) && !u.includes("..")) return true;
-        try { const x = new URL(u); return x.protocol === "https:" && /\.supabase\.co$/.test(x.hostname) && x.pathname.startsWith("/storage/v1/object/public/media/"); } catch { return false; }
+        try { const x = new URL(u); return x.protocol === "https:" && x.hostname === "res.cloudinary.com" && /^\/[\w-]+\/(image|raw)\/upload\/media\/\d{4}\/\d{2}\/[a-f0-9]{24}\.(webp|pdf)$/.test(x.pathname); } catch { return false; }
       };
       let last: HTMLElement | null = null;
       const close = () => { lb.hidden = true; document.body.style.overflow = ""; last?.focus(); };

@@ -1,14 +1,16 @@
 import "server-only";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createHash } from "node:crypto";
+import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
+import { FieldPath, getFirestore, type Firestore } from "firebase-admin/firestore";
 
 /**
  * Tiny document store.
  *
- * Production (Vercel): Supabase table `documents` + Storage bucket `media`, accessed ONLY from the
- * server with the service-role key. The browser never talks to Supabase, and the table has Row Level
- * Security enabled with no policies, so the public anon key can read nothing.
+ * Production (Vercel): Firestore (one collection per `Collection`), accessed ONLY from the server with the
+ * Admin SDK service account (Firestore rules deny all browser access), plus Cloudinary folder `media/` for
+ * uploaded photos and PDFs (signed uploads from the server only; files are public to view).
  *
  * Local development: JSON files in `.local-data/` (never used in production).
  */
@@ -20,24 +22,45 @@ export type Collection =
 const ID_RE = /^[A-Za-z0-9_.:@+-]{1,160}$/;
 
 function assertId(id: string) {
-  if (!ID_RE.test(id) || id.includes("..")) throw new Error("Invalid document id");
+  // Firestore also reserves ids that look like __name__
+  if (!ID_RE.test(id) || id.includes("..") || /^__.*__$/.test(id)) throw new Error("Invalid document id");
 }
 
-export function storeMode(): "supabase" | "local" {
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) return "supabase";
+const env = () => ({
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  privateKey: process.env.FIREBASE_PRIVATE_KEY,
+  cloudinary: process.env.CLOUDINARY_URL, // cloudinary://<api_key>:<api_secret>@<cloud_name>
+});
+
+export function storeMode(): "cloud" | "local" {
+  const e = env();
+  if (e.projectId && e.clientEmail && e.privateKey && e.cloudinary) return "cloud";
   if (process.env.NODE_ENV !== "production" || process.env.ALLOW_LOCAL_STORE === "1") return "local";
   // Fail closed: never silently write to the throw-away serverless filesystem
-  throw new Error("Storage is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
+  throw new Error("Storage is not configured. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY and CLOUDINARY_URL.");
 }
 
-let client: SupabaseClient | null = null;
-function sb(): SupabaseClient {
-  if (!client) {
-    client = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
+let firestore: Firestore | null = null;
+function app(): App {
+  const existing = getApps()[0];
+  if (existing) return existing;
+  const e = env();
+  return initializeApp({
+    credential: cert({
+      projectId: e.projectId,
+      clientEmail: e.clientEmail,
+      // Vercel and .env files keep the key on one line with literal \n
+      privateKey: e.privateKey!.replace(/\n/g, "\n"),
+    }),
+  });
+}
+function db(): Firestore {
+  if (!firestore) {
+    firestore = getFirestore(app());
+    firestore.settings({ ignoreUndefinedProperties: true });
   }
-  return client;
+  return firestore;
 }
 
 export const LOCAL_DIR = path.join(process.cwd(), ".local-data");
@@ -46,10 +69,9 @@ export const LOCAL_DIR = path.join(process.cwd(), ".local-data");
 
 export async function getDoc<T>(collection: Collection, id: string): Promise<T | null> {
   assertId(id);
-  if (storeMode() === "supabase") {
-    const { data, error } = await sb().from("documents").select("data").eq("collection", collection).eq("id", id).maybeSingle();
-    if (error) throw new Error("Database read failed: " + error.message);
-    return (data?.data as T) ?? null;
+  if (storeMode() === "cloud") {
+    const snap = await db().collection(collection).doc(id).get();
+    return snap.exists ? (snap.data() as T) : null;
   }
   try {
     return JSON.parse(await fs.readFile(path.join(LOCAL_DIR, collection, id + ".json"), "utf8")) as T;
@@ -60,16 +82,9 @@ export async function getDoc<T>(collection: Collection, id: string): Promise<T |
 }
 
 export async function listDocs<T>(collection: Collection): Promise<T[]> {
-  if (storeMode() === "supabase") {
-    const out: T[] = [];
-    for (let from = 0; ; from += 1000) {
-      const { data, error } = await sb().from("documents").select("data").eq("collection", collection)
-        .order("id").range(from, from + 999);
-      if (error) throw new Error("Database read failed: " + error.message);
-      out.push(...(data ?? []).map((r) => r.data as T));
-      if (!data || data.length < 1000) break;
-    }
-    return out;
+  if (storeMode() === "cloud") {
+    const snap = await db().collection(collection).orderBy(FieldPath.documentId()).get();
+    return snap.docs.map((d) => d.data() as T);
   }
   const dir = path.join(LOCAL_DIR, collection);
   let files: string[] = [];
@@ -84,10 +99,8 @@ export async function listDocs<T>(collection: Collection): Promise<T[]> {
 
 export async function putDoc<T>(collection: Collection, id: string, data: T): Promise<void> {
   assertId(id);
-  if (storeMode() === "supabase") {
-    const { error } = await sb().from("documents")
-      .upsert({ collection, id, data, updated_at: new Date().toISOString() }, { onConflict: "collection,id" });
-    if (error) throw new Error("Database write failed: " + error.message);
+  if (storeMode() === "cloud") {
+    await db().collection(collection).doc(id).set(data as FirebaseFirestore.DocumentData);
     return;
   }
   const dir = path.join(LOCAL_DIR, collection);
@@ -100,9 +113,8 @@ export async function putDoc<T>(collection: Collection, id: string, data: T): Pr
 
 export async function deleteDoc(collection: Collection, id: string): Promise<void> {
   assertId(id);
-  if (storeMode() === "supabase") {
-    const { error } = await sb().from("documents").delete().eq("collection", collection).eq("id", id);
-    if (error) throw new Error("Database delete failed: " + error.message);
+  if (storeMode() === "cloud") {
+    await db().collection(collection).doc(id).delete();
     return;
   }
   await fs.rm(path.join(LOCAL_DIR, collection, id + ".json"), { force: true });
@@ -113,11 +125,42 @@ export async function deleteDoc(collection: Collection, id: string): Promise<voi
 const KEY_RE = /^\d{4}\/\d{2}\/[a-f0-9]{24}\.(webp|pdf)$/;
 export const isMediaKey = (k: string) => KEY_RE.test(k);
 
+/** Media Library folder every upload goes into (the account uses Cloudinary's dynamic folders). */
+const MEDIA_FOLDER = "La Europa Education";
+
+/* Cloudinary keeps images as "image" (public id without extension) and PDFs as "raw" (with extension). */
+const resourceType = (key: string) => (key.endsWith(".pdf") ? "raw" : "image");
+const publicId = (key: string) => "media/" + (resourceType(key) === "raw" ? key : key.replace(/\.webp$/, ""));
+
+function cloudinary() {
+  const u = new URL(env().cloudinary!);
+  return { cloud: u.hostname, apiKey: decodeURIComponent(u.username), secret: decodeURIComponent(u.password) };
+}
+
+/** Signed call to Cloudinary's upload API (https://cloudinary.com/documentation/image_upload_api_reference). */
+async function cloudinaryCall(action: "upload" | "destroy", key: string, params: Record<string, string>, file?: Blob) {
+  const c = cloudinary();
+  const signed: Record<string, string> = { ...params, public_id: publicId(key), timestamp: String(Math.floor(Date.now() / 1000)) };
+  const toSign = Object.keys(signed).sort().map((k) => `${k}=${signed[k]}`).join("&");
+  const form = new FormData();
+  for (const [k, v] of Object.entries(signed)) form.set(k, v);
+  form.set("api_key", c.apiKey);
+  form.set("signature", createHash("sha1").update(toSign + c.secret).digest("hex"));
+  if (file) form.set("file", file);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${c.cloud}/${resourceType(key)}/${action}`, { method: "POST", body: form });
+  const json = (await res.json().catch(() => ({}))) as { error?: { message?: string }; result?: string };
+  if (!res.ok || json.error) throw new Error(json.error?.message || `Cloudinary ${action} failed (${res.status})`);
+  return json;
+}
+
 export async function putMedia(key: string, body: Buffer, contentType: string): Promise<void> {
   if (!isMediaKey(key)) throw new Error("Invalid media key");
-  if (storeMode() === "supabase") {
-    const { error } = await sb().storage.from("media").upload(key, body, { contentType, upsert: false, cacheControl: "31536000" });
-    if (error) throw new Error("Upload failed: " + error.message);
+  if (storeMode() === "cloud") {
+    try {
+      await cloudinaryCall("upload", key, { overwrite: "false", asset_folder: MEDIA_FOLDER }, new Blob([new Uint8Array(body)], { type: contentType }));
+    } catch (e) {
+      throw new Error("Upload failed: " + (e as Error).message);
+    }
     return;
   }
   const file = path.join(LOCAL_DIR, "media", key);
@@ -127,8 +170,9 @@ export async function putMedia(key: string, body: Buffer, contentType: string): 
 
 export async function deleteMedia(key: string): Promise<void> {
   if (!isMediaKey(key)) return; // never touch anything we did not upload
-  if (storeMode() === "supabase") {
-    await sb().storage.from("media").remove([key]);
+  if (storeMode() === "cloud") {
+    // best effort, like before: a leftover file must never block saving content
+    await cloudinaryCall("destroy", key, { invalidate: "true" }).catch((e) => console.error("Media delete failed", e));
     return;
   }
   await fs.rm(path.join(LOCAL_DIR, "media", key), { force: true });
@@ -148,8 +192,8 @@ export function mediaUrl(ref: string | undefined | null): string {
   if (!ref) return "";
   if (ref.startsWith("/")) return ref;
   if (!isMediaKey(ref)) return "";
-  if (storeMode() === "supabase") {
-    return `${process.env.SUPABASE_URL!.replace(/\/$/, "")}/storage/v1/object/public/media/${ref}`;
+  if (storeMode() === "cloud") {
+    return `https://res.cloudinary.com/${cloudinary().cloud}/${resourceType(ref)}/upload/media/${ref}`;
   }
   return `/media/${ref}`;
 }
