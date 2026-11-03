@@ -34,7 +34,7 @@ const docId = "u_" + createHash("sha256").update(email).digest("hex").slice(0, 3
 const { FIREBASE_PROJECT_ID: projectId, FIREBASE_CLIENT_EMAIL: clientEmail, FIREBASE_PRIVATE_KEY: privateKey } = process.env;
 
 if (projectId && clientEmail && privateKey) {
-  const app = initializeApp({ credential: cert({ projectId, clientEmail, privateKey: privateKey.replace(/\n/g, "\n") }) });
+  const app = initializeApp({ credential: cert({ projectId, clientEmail, privateKey: privateKey.trim().replace(/^"|"$/g, "").replace(/\\r/g, "").replace(/\\n/g, "\n") }) });
   await getFirestore(app).collection("users").doc(docId).set(user);
   console.log(`✓ Admin login ready in Firebase (${projectId}): ${email}`);
 } else {

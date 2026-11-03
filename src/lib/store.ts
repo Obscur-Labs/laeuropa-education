@@ -41,6 +41,14 @@ export function storeMode(): "cloud" | "local" {
   throw new Error("Storage is not configured. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY and CLOUDINARY_URL.");
 }
 
+/**
+ * The private key as pasted into Vercel or .env: often on one line with literal "\n" (backslash + n),
+ * sometimes still wrapped in the quotes from the JSON file. Turn it back into a real multi-line PEM key.
+ */
+function pemKey(raw: string): string {
+  return raw.trim().replace(/^"|"$/g, "").replace(/\\r/g, "").replace(/\\n/g, "\n");
+}
+
 let firestore: Firestore | null = null;
 function app(): App {
   const existing = getApps()[0];
@@ -50,8 +58,7 @@ function app(): App {
     credential: cert({
       projectId: e.projectId,
       clientEmail: e.clientEmail,
-      // Vercel and .env files keep the key on one line with literal \n
-      privateKey: e.privateKey!.replace(/\n/g, "\n"),
+      privateKey: pemKey(e.privateKey!),
     }),
   });
 }
