@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageUser } from "@/lib/auth";
 import { getAllReviews, getCountries, type Review } from "@/lib/content";
@@ -18,7 +19,7 @@ export default async function EditReview({ params }: { params: Promise<{ id: str
   return (
     <>
       <div className="page-head">
-        <div><a href="/admin/reviews" className="back-link">← All reviews</a><h1>{isNew ? "Add student review" : "Edit review"}</h1></div>
+        <div><Link href="/admin/reviews" className="back-link">← All reviews</Link><h1>{isNew ? "Add student review" : "Edit review"}</h1></div>
       </div>
       <ActionForm action={saveReview}>
         <div className="editor-layout">

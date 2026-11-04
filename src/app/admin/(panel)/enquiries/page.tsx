@@ -1,61 +1,60 @@
+import Link from "next/link";
 import { requirePageUser } from "@/lib/auth";
-import { phoneDigits, type Enquiry } from "@/lib/content";
+import { getCountries, type Enquiry } from "@/lib/content";
 import { listDocs } from "@/lib/store";
+import { flagLookup } from "@/lib/admin-format";
 import Flash from "@/components/admin/Flash";
-import ActionForm from "@/components/admin/ActionForm";
-import { updateEnquiry } from "./actions";
+import EnquiryTicket from "@/components/admin/EnquiryTicket";
+import Icon from "@/components/admin/Icon";
 
 const TABS = [["all", "All"], ["new", "New"], ["contacted", "Contacted"], ["closed", "Closed"]] as const;
 
-export default async function Enquiries({ searchParams }: { searchParams: Promise<{ status?: string; ok?: string }> }) {
+export default async function Enquiries({ searchParams }: { searchParams: Promise<{ status?: string; ok?: string; q?: string }> }) {
   await requirePageUser();
   const sp = await searchParams;
-  const all = (await listDocs<Enquiry>("enquiries")).sort((a, b) => b.id.localeCompare(a.id));
+  const [enquiries, countries] = await Promise.all([listDocs<Enquiry>("enquiries"), getCountries()]);
+  const all = enquiries.sort((a, b) => b.id.localeCompare(a.id));
+  const flag = flagLookup(countries);
   const filter = TABS.some(([k]) => k === sp.status) ? sp.status! : "all";
-  const list = filter === "all" ? all : all.filter((q) => q.status === filter);
-  const count = (k: string) => (k === "all" ? all.length : all.filter((q) => q.status === k).length);
+  const search = (sp.q ?? "").trim().slice(0, 80);
+  const needle = search.toLowerCase();
+  const digits = search.replace(/\D/g, "");
+  const matches = (q: Enquiry) =>
+    !needle ||
+    [q.name, q.email, q.city, q.country, q.service, q.level, q.message].some((v) => v?.toLowerCase().includes(needle)) ||
+    (digits.length >= 3 && q.phone.replace(/\D/g, "").includes(digits));
+  const inTab = (k: string) => all.filter((q) => (k === "all" || q.status === k) && matches(q));
+  const list = inTab(filter);
+  const tabHref = (k: string) => `/admin/enquiries?status=${k}${search ? `&q=${encodeURIComponent(search)}` : ""}`;
 
   return (
     <>
       <Flash ok={sp.ok} />
       <div className="page-head">
-        <div><h1>Enquiries</h1><p className="muted">Requests submitted through the website&apos;s contact form.</p></div>
+        <div><h1>Enquiries</h1><p className="muted">Requests from the website&apos;s contact form. Times are India time.</p></div>
         {all.length > 0 && <a href="/admin/enquiries-export" className="btn btn-ghost">Download CSV</a>}
       </div>
-      <div className="tabs">
-        {TABS.map(([k, l]) => <a key={k} href={`/admin/enquiries?status=${k}`} className={filter === k ? "on" : ""}>{l} <small>{count(k)}</small></a>)}
+
+      <div className="toolbar">
+        <nav className="tabs" aria-label="Filter by status">
+          {TABS.map(([k, l]) => <Link key={k} href={tabHref(k)} className={filter === k ? "on" : undefined} aria-current={filter === k ? "page" : undefined}>{l} <small>{inTab(k).length}</small></Link>)}
+        </nav>
+        <form className="search" action="/admin/enquiries" role="search">
+          <input type="hidden" name="status" value={filter} />
+          <Icon name="search" size={16} />
+          <input type="search" name="q" defaultValue={search} placeholder="Search name, phone, city…" aria-label="Search enquiries" maxLength={80} />
+        </form>
       </div>
-      {list.length === 0 ? <div className="empty">No enquiries here yet.</div> : (
-        <div className="enq-list">
-          {list.map((q) => (
-            <article key={q.id} className={`enq enq-${q.status}`}>
-              <header>
-                <div><strong>{q.name}</strong><span className={`status status-${q.status}`}>{q.status[0].toUpperCase() + q.status.slice(1)}</span></div>
-                <time>{q.created_at}</time>
-              </header>
-              <div className="enq-grid">
-                <div><small>Phone</small><a href={`tel:+${phoneDigits(q.phone)}`}>{q.phone}</a> · <a href={`https://wa.me/${phoneDigits(q.phone)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a></div>
-                {q.email && <div><small>Email</small><a href={`mailto:${q.email}`}>{q.email}</a></div>}
-                {q.city && <div><small>City</small>{q.city}</div>}
-                <div><small>Country</small>{q.country || "Not decided"}</div>
-                {q.level && <div><small>Level</small>{q.level}</div>}
-                <div><small>Service</small>{q.service}</div>
-              </div>
-              {q.message && <p className="enq-msg" style={{ whiteSpace: "pre-line" }}>{q.message}</p>}
-              <div className="enq-actions">
-                {(["new", "contacted", "closed"] as const).filter((st) => st !== q.status).map((st) => (
-                  <ActionForm key={st} action={updateEnquiry} className="inline">
-                    <input type="hidden" name="id" value={q.id} /><input type="hidden" name="op" value={st} /><input type="hidden" name="filter" value={filter} />
-                    <button type="submit" className="btn btn-small">{st === "new" ? "Mark new" : st === "contacted" ? "Mark contacted" : "Close"}</button>
-                  </ActionForm>
-                ))}
-                <ActionForm action={updateEnquiry} className="inline" confirm="Delete this enquiry permanently?">
-                  <input type="hidden" name="id" value={q.id} /><input type="hidden" name="op" value="delete" /><input type="hidden" name="filter" value={filter} />
-                  <button type="submit" className="btn btn-small btn-danger">Delete</button>
-                </ActionForm>
-              </div>
-            </article>
-          ))}
+
+      {list.length === 0 ? (
+        <div className="empty">
+          {search ? <p>No enquiries match “{search}”. <Link href={`/admin/enquiries?status=${filter}`}>Clear the search</Link></p>
+            : filter === "new" ? <p>No new enquiries. Everyone who wrote in has been contacted.</p>
+            : <p>No enquiries here yet. They appear when someone sends the contact form on the website.</p>}
+        </div>
+      ) : (
+        <div className="ticket-list">
+          {list.map((q) => <EnquiryTicket key={q.id} q={q} flag={flag(q.country)} filter={filter} />)}
         </div>
       )}
     </>

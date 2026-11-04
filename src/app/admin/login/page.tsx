@@ -3,7 +3,7 @@ import { currentUser } from "@/lib/auth";
 import LoginForm from "./LoginForm";
 
 export default async function LoginPage() {
-  if (await currentUser()) redirect("/admin/updates");
+  if (await currentUser()) redirect("/admin");
   return (
     <div className="admin-bare">
       <main className="bare-main">

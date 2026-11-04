@@ -21,7 +21,7 @@ export async function login(_prev: { error: string } | null, form: FormData): Pr
   }
   await clearHits("login-acct", loginId);
   await startSession(user);
-  redirect("/admin/updates");
+  redirect("/admin");
 }
 
 export async function logout(): Promise<void> {

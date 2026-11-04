@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageUser } from "@/lib/auth";
 import { getCountries, type Country } from "@/lib/content";
@@ -18,7 +19,7 @@ export default async function EditCountry({ params }: { params: Promise<{ index:
   return (
     <>
       <div className="page-head">
-        <div><a href="/admin/countries" className="back-link">← All countries</a><h1>{isNew ? "Add country" : `Edit ${c.name}`}</h1></div>
+        <div><Link href="/admin/countries" className="back-link">← All countries</Link><h1>{isNew ? "Add country" : `Edit ${c.name}`}</h1></div>
       </div>
       <ActionForm action={saveCountry} className="panel">
         <input type="hidden" name="index" value={i} />

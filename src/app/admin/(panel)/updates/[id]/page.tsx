@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageUser } from "@/lib/auth";
 import { getAllPosts, POST_CATEGORIES, todayYmd, type Post } from "@/lib/content";
@@ -28,7 +29,7 @@ export default async function EditPost({ params, searchParams }: { params: Promi
       <Flash ok={sp.ok} />
       <div className="page-head">
         <div>
-          <a href="/admin/updates" className="back-link">← All updates</a>
+          <Link href="/admin/updates" className="back-link">← All updates</Link>
           <h1>{isNew ? "New update" : "Edit update"}</h1>
         </div>
         {!isNew && <a href={`/updates/${p.slug}`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">{p.status === "published" ? "View on site ↗" : "Preview ↗"}</a>}

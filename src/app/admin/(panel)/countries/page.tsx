@@ -1,3 +1,5 @@
+import Link from "next/link";
+import Icon from "@/components/admin/Icon";
 import { requirePageUser } from "@/lib/auth";
 import { getCountries } from "@/lib/content";
 import Flash from "@/components/admin/Flash";
@@ -14,7 +16,7 @@ export default async function CountriesAdmin({ searchParams }: { searchParams: P
       <Flash ok={sp.ok} />
       <div className="page-head">
         <div><h1>Countries</h1><p className="muted">{list.length} countries on the website. The first 16 appear in the home page flag circle; the first 6 in the footer.</p></div>
-        <a href="/admin/countries/new" className="btn btn-primary">+ Add country</a>
+        <Link href="/admin/countries/new" className="btn btn-primary"><Icon name="plus" size={16} />Add country</Link>
       </div>
       <div className="table-wrap">
         <table className="table">
@@ -23,7 +25,7 @@ export default async function CountriesAdmin({ searchParams }: { searchParams: P
             {list.map((c, i) => (
               <tr key={c.code}>
                 <td className="muted">{i + 1}</td>
-                <td><div className="t-title"><Flag code={c.code} name={c.name} className="admin-flag" /><a href={`/admin/countries/${i}`}><strong>{c.name}</strong></a></div></td>
+                <td><div className="t-title"><Flag code={c.code} name={c.name} className="admin-flag" /><Link href={`/admin/countries/${i}`}><strong>{c.name}</strong></Link></div></td>
                 <td>{c.region}</td>
                 <td>{c.intake}</td>
                 <td>{c.popular && <span className="status status-published">Popular</span>}</td>
@@ -32,7 +34,7 @@ export default async function CountriesAdmin({ searchParams }: { searchParams: P
                     <button type="submit" className="linkish" title="Move up" disabled={i === 0}>↑</button></ActionForm>
                   <ActionForm action={countryOp} className="inline"><input type="hidden" name="index" value={i} /><input type="hidden" name="code" value={c.code} /><input type="hidden" name="op" value="down" />
                     <button type="submit" className="linkish" title="Move down" disabled={i === list.length - 1}>↓</button></ActionForm>
-                  <a href={`/admin/countries/${i}`}>Edit</a>
+                  <Link href={`/admin/countries/${i}`}>Edit</Link>
                   <ActionForm action={countryOp} className="inline" confirm="Remove this country from the website?">
                     <input type="hidden" name="index" value={i} /><input type="hidden" name="code" value={c.code} /><input type="hidden" name="op" value="delete" />
                     <button type="submit" className="linkish danger">Remove</button></ActionForm>

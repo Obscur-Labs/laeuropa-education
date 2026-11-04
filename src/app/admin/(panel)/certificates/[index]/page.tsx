@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageUser } from "@/lib/auth";
 import { getCertificates, type Certificate } from "@/lib/content";
@@ -17,7 +18,7 @@ export default async function EditCertificate({ params }: { params: Promise<{ in
   return (
     <>
       <div className="page-head">
-        <div><a href="/admin/certificates" className="back-link">← All certificates</a><h1>{isNew ? "Add certificate" : "Edit certificate"}</h1></div>
+        <div><Link href="/admin/certificates" className="back-link">← All certificates</Link><h1>{isNew ? "Add certificate" : "Edit certificate"}</h1></div>
       </div>
       <ActionForm action={saveCertificate}>
         <div className="editor-layout">

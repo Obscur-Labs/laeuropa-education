@@ -1,5 +1,6 @@
 import "server-only";
 import { redirect, unstable_rethrow } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { AuthError, requireActionUser, type Role, type User } from "./auth";
 import { UploadError } from "./uploads";
 
@@ -24,6 +25,8 @@ export async function adminAction(role: Role | undefined, fn: (user: User) => Pr
     console.error("Admin action failed", e);
     return { error: "Something went wrong while saving. Please try again." };
   }
+  // The panel keeps its sidebar between pages, so refresh it (e.g. the new-enquiries badge) after every change
+  revalidatePath("/admin", "layout");
   redirect(next);
 }
 
