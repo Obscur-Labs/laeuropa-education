@@ -36,7 +36,7 @@ export default async function UpdatesAdmin({ searchParams }: { searchParams: Pro
       ) : (
         <div className="table-wrap">
           <table className="table">
-            <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Date</th><th></th></tr></thead>
+            <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Date</th><th className="th-actions">Actions</th></tr></thead>
             <tbody>
               {posts.map((p) => {
                 const scheduled = p.status === "published" && p.date > today;

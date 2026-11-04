@@ -116,6 +116,7 @@ form[aria-busy="true"] button[type="submit"]::before { content: ""; width: 12px;
 .t-title small { display: block; color: var(--muted); }
 .t-title strong { color: var(--ink); }
 .t-actions { white-space: nowrap; text-align: right; }
+.table th.th-actions { text-align: right; }
 .t-actions > * { margin-left: 14px; display: inline; }
 .status { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; white-space: nowrap; }
 .status-published, .status-closed { background: #e3f4ea; color: #0b5530; }
@@ -256,12 +257,22 @@ input[type=file] { font-size: 13.5px; max-width: 100%; }
 .order-error { color: var(--red); font-weight: 600; }
 .order-table th:first-child, .order-handle-cell { width: 44px; padding-right: 0; }
 .order-handle { width: 32px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #98a2b8; cursor: grab; touch-action: none; transition: background .15s, color .15s; }
+.order-handle .icon { pointer-events: none; }
 .order-handle:hover, .order-handle:focus-visible { background: var(--soft); color: var(--ink); }
-.order-table.is-dragging, .order-table.is-dragging * { cursor: grabbing !important; user-select: none; }
-.order-table tbody tr.dragging { background: #EAF0FC; box-shadow: inset 3px 0 0 var(--blue); position: relative; z-index: 1; }
-.order-table tbody tr.dragging .order-handle { color: var(--blue); }
-.order-table tbody tr.dragging td { border-bottom-color: transparent; }
+.order-table.is-dragging, .order-table.is-dragging * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+.order-table.is-dragging tbody tr[data-code] { will-change: transform; }
+.order-table.is-dragging tbody tr:hover { background: none; }
+/* the picked-up row floats above the others */
+.order-table tbody tr.dragging { position: relative; z-index: 3; filter: drop-shadow(0 12px 22px rgba(11, 25, 56, .22)); }
+.order-table tbody tr.dragging td { background: #F3F7FF; border-bottom-color: transparent; box-shadow: inset 0 1px 0 #c9d6f3, inset 0 -1px 0 #c9d6f3; }
+.order-table tbody tr.dragging td:first-child { box-shadow: inset 3px 0 0 var(--blue), inset 0 1px 0 #c9d6f3, inset 0 -1px 0 #c9d6f3; }
+.order-table tbody tr.dragging .order-handle { color: var(--blue); background: #e2eafb; }
+.order-table tbody tr[data-code] td { background-clip: padding-box; }
 .order-pos { font-variant-numeric: tabular-nums; width: 40px; }
+/* while dragging, every row shows the position it will end up in */
+.order-pos[data-live] span { display: none; }
+.order-pos[data-live]::before { content: attr(data-live); }
+.order-table tbody tr.dragging .order-pos { color: var(--blue); font-weight: 700; }
 /* a labelled line under position 6 (footer) and 16 (home page): rows slide past it while dragging */
 .order-table tr.order-mark td { padding: 0 18px 0 62px; border-bottom: 1px solid var(--line-soft); background: var(--soft); }
 .order-table tbody tr.order-mark:hover { background: none; }

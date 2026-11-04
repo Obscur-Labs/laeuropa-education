@@ -24,7 +24,7 @@ export default async function ReviewsAdmin({ searchParams }: { searchParams: Pro
       {reviews.length === 0 ? <div className="empty">No reviews yet. <Link href="/admin/reviews/new">Add the first student review →</Link></div> : (
         <div className="table-wrap">
           <table className="table">
-            <thead><tr><th>Student</th><th>Rating</th><th>Country</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Student</th><th>Rating</th><th>Country</th><th>Status</th><th className="th-actions">Actions</th></tr></thead>
             <tbody>
               {reviews.map((r, i) => (
                 <tr key={r.id}>
