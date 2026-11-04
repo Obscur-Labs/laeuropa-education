@@ -19,14 +19,15 @@ const PATHS = {
   check: "M5 12.5 10 17l9-10",
   clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",
   arrow: "M5 12h14M13 6l6 6-6 6",
+  grip: "M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01",
 } as const;
 
 export type IconName = keyof typeof PATHS;
 
-export default function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
+export default function Icon({ name, size = 18, weight = 1.8 }: { name: IconName; size?: number; weight?: number }) {
   return (
     <svg className="icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      strokeWidth={weight} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
       <path d={PATHS[name]} />
     </svg>
   );

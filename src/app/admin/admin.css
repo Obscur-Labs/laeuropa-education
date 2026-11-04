@@ -249,6 +249,25 @@ input[type=file] { font-size: 13.5px; max-width: 100%; }
 .faq-item { position: relative; padding-top: 16px; }
 .faq-tools { display: flex; gap: 14px; justify-content: flex-end; margin-bottom: 4px; font-size: 14px; }
 
+/* ---------- Drag-and-drop country order ---------- */
+.order-status { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 14px; color: var(--muted); min-height: 22px; }
+.order-saving { color: var(--blue); }
+.order-saved { color: var(--green); font-weight: 600; }
+.order-error { color: var(--red); font-weight: 600; }
+.order-table th:first-child, .order-handle-cell { width: 44px; padding-right: 0; }
+.order-handle { width: 32px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #98a2b8; cursor: grab; touch-action: none; transition: background .15s, color .15s; }
+.order-handle:hover, .order-handle:focus-visible { background: var(--soft); color: var(--ink); }
+.order-table.is-dragging, .order-table.is-dragging * { cursor: grabbing !important; user-select: none; }
+.order-table tbody tr.dragging { background: #EAF0FC; box-shadow: inset 3px 0 0 var(--blue); position: relative; z-index: 1; }
+.order-table tbody tr.dragging .order-handle { color: var(--blue); }
+.order-table tbody tr.dragging td { border-bottom-color: transparent; }
+.order-pos { font-variant-numeric: tabular-nums; width: 40px; }
+/* a labelled line under position 6 (footer) and 16 (home page): rows slide past it while dragging */
+.order-table tr.order-mark td { padding: 0 18px 0 62px; border-bottom: 1px solid var(--line-soft); background: var(--soft); }
+.order-table tbody tr.order-mark:hover { background: none; }
+.order-table tr.order-mark span { display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 12px; font-weight: 600; letter-spacing: .02em; color: var(--muted); }
+.order-table tr.order-mark span::before { content: ""; flex: 0 0 18px; border-top: 2px dashed #aab5cc; }
+
 /* ---------- Reviews & certificates ---------- */
 .avatar { width: 44px !important; height: 44px !important; border-radius: 50% !important; object-fit: cover; flex: none; }
 .avatar-empty { display: grid; place-items: center; background: var(--blue); color: #fff; font-weight: 700; }
