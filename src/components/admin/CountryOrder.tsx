@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
 import type { Country } from "@/lib/content";
 import { Flag } from "@/components/ui";
 import { countryOp, reorderCountries } from "@/app/admin/(panel)/countries/actions";
@@ -38,19 +38,44 @@ function move<T>(list: T[], from: number, to: number): T[] {
   return next;
 }
 
+const LEAVE_PROMPT = "You changed the country order but did not save it. Leave without saving?";
+
 /**
  * Countries table with drag-and-drop ordering.
  * While dragging nothing in the DOM is reordered: the picked-up row follows the pointer and the
  * others slide into their new slots with CSS transforms, so the drag never loses the pointer.
- * The new order is committed (and saved) on drop. Esc cancels. Arrow keys on a handle also move rows.
+ * Moves only change the order on screen; a save bar appears and nothing reaches the website until
+ * "Save order" is pressed. Esc cancels a drag. Arrow keys on a handle also move rows.
  */
 export default function CountryOrder({ initial }: { initial: Country[] }) {
   const [list, setList] = useState(initial);
+  const [saved, setSaved] = useState(initial);         // the order the website currently uses
   const [dragging, setDragging] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>({ kind: "idle", text: "" });
   const body = useRef<HTMLTableSectionElement>(null);
-  const saved = useRef(initial);                       // last order the server confirmed
   const flip = useRef<Map<string, number> | null>(null); // where rows were on screen just before a reorder
+
+  const changed = list.filter((c, i) => saved[i]?.code !== c.code).length;
+  const dirty = changed > 0;
+  // Edit and Remove talk to the server, which only knows the saved order
+  const savedIndex = new Map(saved.map((c, i) => [c.code, i]));
+
+  // Ask before leaving the page (reload, close, or any link) while the new order is unsaved
+  useEffect(() => {
+    if (!dirty) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); };
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as Element | null)?.closest?.("a[href]");
+      if (!a || a.getAttribute("target") === "_blank") return;
+      if (!window.confirm(LEAVE_PROMPT)) { e.preventDefault(); e.stopPropagation(); }
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    document.addEventListener("click", onClick, true);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      document.removeEventListener("click", onClick, true);
+    };
+  }, [dirty]);
 
   const rowEls = () => Array.from(body.current?.querySelectorAll<HTMLElement>("tr[data-code]") ?? []);
 
@@ -79,17 +104,28 @@ export default function CountryOrder({ initial }: { initial: Country[] }) {
     flip.current = new Map(rows.map((r) => [r.dataset.code!, r.getBoundingClientRect().top]));
   }
 
-  async function save(next: Country[], movedName: string) {
+  /** A move only changes the order on screen; "Save order" sends it to the website. */
+  function reorder(next: Country[]) {
+    setList(next);
+    if (status.kind === "saved" || status.kind === "error") setStatus({ kind: "idle", text: "" });
+  }
+
+  async function saveOrder() {
+    const next = list;
     setStatus({ kind: "saving", text: "Saving the new order…" });
     const res = await reorderCountries(next.map((c) => c.code));
     if (res?.error) {
-      remember();
-      setList(saved.current);
-      setStatus({ kind: "error", text: res.error });
+      setStatus({ kind: "error", text: res.error }); // the new order stays on screen so it can be retried
       return;
     }
-    saved.current = next;
-    setStatus({ kind: "saved", text: `Saved. ${movedName} is now number ${next.findIndex((c) => c.name === movedName) + 1}.` });
+    setSaved(next);
+    setStatus({ kind: "saved", text: "Order saved. The website now shows countries in this order." });
+  }
+
+  function discard() {
+    remember();
+    setList(saved);
+    setStatus({ kind: "idle", text: "" });
   }
 
   /** Positions the rows for the current pointer position during a drag. */
@@ -161,9 +197,7 @@ export default function CountryOrder({ initial }: { initial: Country[] }) {
         return;
       }
       remember(d.rows); // where everything is on screen right now, so the drop settles smoothly
-      const next = move(d.list, d.from, d.to);
-      setList(next);
-      save(next, d.list[d.from].name);
+      reorder(move(d.list, d.from, d.to));
     }
 
     window.addEventListener("pointermove", onMove);
@@ -177,17 +211,17 @@ export default function CountryOrder({ initial }: { initial: Country[] }) {
     if (to < 0 || to >= list.length || to === i) return;
     e.preventDefault();
     remember();
-    const next = move(list, i, to);
-    setList(next);
-    save(next, list[i].name);
+    reorder(move(list, i, to));
   }
+
+  const saving = status.kind === "saving";
 
   return (
     <>
       <p className={`order-status order-${status.kind}`} role="status" aria-live="polite">
-        {status.kind === "idle"
-          ? <><Icon name="grip" size={16} weight={3} /> Drag a country by its handle to any position. It saves when you let go. Press Esc to cancel.</>
-          : status.text}
+        {status.kind === "saved" || status.kind === "error"
+          ? status.text
+          : <><Icon name="grip" size={16} weight={3} /> Drag a country by its handle to any position, then press Save order. Press Esc to cancel a drag.</>}
       </p>
       <div className="table-wrap">
         <table className={`table order-table${dragging ? " is-dragging" : ""}`}>
@@ -195,7 +229,8 @@ export default function CountryOrder({ initial }: { initial: Country[] }) {
           <tbody ref={body}>
             {list.map((c, i) => (
               <Fragment key={c.code}>
-                <Row c={c} i={i} total={list.length} dragging={dragging === c.code} onPointerDown={onPointerDown} onKeyDown={onKeyDown} />
+                <Row c={c} i={i} total={list.length} savedAt={savedIndex.get(c.code) ?? i} moved={saved[i]?.code !== c.code}
+                  locked={dirty} dragging={dragging === c.code} onPointerDown={onPointerDown} onKeyDown={onKeyDown} />
                 {MARKS[i + 1] && list.length > i + 1 && (
                   <tr className="order-mark" aria-hidden="true"><td colSpan={7}><span>{MARKS[i + 1]}</span></td></tr>
                 )}
@@ -204,17 +239,36 @@ export default function CountryOrder({ initial }: { initial: Country[] }) {
           </tbody>
         </table>
       </div>
+
+      {dirty && (
+        <div className="order-bar" role="region" aria-label="Unsaved order">
+          <p>
+            <strong>{changed === 1 ? "1 country has" : `${changed} countries have`} a new position.</strong>{" "}
+            <span>The website keeps the old order until you save.</span>
+          </p>
+          <div className="order-bar-actions">
+            <button type="button" className="btn btn-ghost" onClick={discard} disabled={saving}>Discard</button>
+            <button type="button" className="btn btn-primary" onClick={saveOrder} disabled={saving}>
+              {saving ? "Saving…" : <><Icon name="check" size={16} />Save order</>}
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
 
-function Row({ c, i, total, dragging, onPointerDown, onKeyDown }: {
-  c: Country; i: number; total: number; dragging: boolean;
+function Row({ c, i, total, savedAt, moved, locked, dragging, onPointerDown, onKeyDown }: {
+  c: Country; i: number; total: number;
+  savedAt: number;   // position in the saved list, which is what the server's Edit and Remove use
+  moved: boolean;    // differs from the saved order
+  locked: boolean;   // an unsaved order is on screen, so Remove waits until it is saved or discarded
+  dragging: boolean;
   onPointerDown: (e: ReactPointerEvent<HTMLButtonElement>, code: string) => void;
   onKeyDown: (e: KeyboardEvent<HTMLButtonElement>, i: number) => void;
 }) {
   return (
-    <tr data-code={c.code} className={dragging ? "dragging" : undefined}>
+    <tr data-code={c.code} className={[dragging && "dragging", moved && "moved"].filter(Boolean).join(" ") || undefined}>
       <td className="order-handle-cell">
         <button type="button" className="order-handle" aria-label={`Move ${c.name}, number ${i + 1} of ${total}. Use the arrow keys.`}
           title="Drag to reorder" onPointerDown={(e) => onPointerDown(e, c.code)} onKeyDown={(e) => onKeyDown(e, i)}>
@@ -222,15 +276,15 @@ function Row({ c, i, total, dragging, onPointerDown, onKeyDown }: {
         </button>
       </td>
       <td className="muted order-pos"><span>{i + 1}</span></td>
-      <td><div className="t-title"><Flag code={c.code} name={c.name} className="admin-flag" /><Link href={`/admin/countries/${i}`}><strong>{c.name}</strong></Link></div></td>
+      <td><div className="t-title"><Flag code={c.code} name={c.name} className="admin-flag" /><Link href={`/admin/countries/${savedAt}`}><strong>{c.name}</strong></Link></div></td>
       <td>{c.region}</td>
       <td>{c.intake}</td>
       <td>{c.popular && <span className="status status-published">Popular</span>}</td>
       <td className="t-actions">
-        <Link href={`/admin/countries/${i}`}>Edit</Link>
+        <Link href={`/admin/countries/${savedAt}`}>Edit</Link>
         <ActionForm action={countryOp} className="inline" confirm={`Remove ${c.name} from the website?`}>
-          <input type="hidden" name="index" value={i} /><input type="hidden" name="code" value={c.code} /><input type="hidden" name="op" value="delete" />
-          <button type="submit" className="linkish danger">Remove</button>
+          <input type="hidden" name="index" value={savedAt} /><input type="hidden" name="code" value={c.code} /><input type="hidden" name="op" value="delete" />
+          <button type="submit" className="linkish danger" disabled={locked} title={locked ? "Save or discard the new order first" : undefined}>Remove</button>
         </ActionForm>
       </td>
     </tr>

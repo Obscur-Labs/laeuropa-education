@@ -268,11 +268,28 @@ input[type=file] { font-size: 13.5px; max-width: 100%; }
 .order-table tbody tr.dragging td:first-child { box-shadow: inset 3px 0 0 var(--blue), inset 0 1px 0 #c9d6f3, inset 0 -1px 0 #c9d6f3; }
 .order-table tbody tr.dragging .order-handle { color: var(--blue); background: #e2eafb; }
 .order-table tbody tr[data-code] td { background-clip: padding-box; }
-.order-pos { font-variant-numeric: tabular-nums; width: 40px; }
+.order-pos { font-variant-numeric: tabular-nums; width: 52px; white-space: nowrap; }
 /* while dragging, every row shows the position it will end up in */
 .order-pos[data-live] span { display: none; }
 .order-pos[data-live]::before { content: attr(data-live); }
 .order-table tbody tr.dragging .order-pos { color: var(--blue); font-weight: 700; }
+/* rows whose position differs from the saved order */
+.order-table tbody tr.moved .order-pos { color: var(--blue); font-weight: 700; }
+.order-table tbody tr.moved .order-pos span::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 1px #d9ad00; vertical-align: middle; }
+.order-table .t-actions button[disabled] { opacity: .35; cursor: not-allowed; }
+/* unsaved order: a bar fixed to the bottom of the screen */
+.order-bar { position: sticky; bottom: 16px; z-index: 5; margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap;
+  padding: 12px 14px 12px 20px; border-radius: 14px; background: var(--ink); color: rgba(255, 255, 255, .8); box-shadow: 0 18px 40px -14px rgba(11, 25, 56, .55); animation: bar-in .25s var(--ease) both; }
+.order-bar p { margin: 0; font-size: 14.5px; }
+.order-bar strong { color: #fff; }
+.order-bar-actions { display: flex; gap: 8px; }
+.order-bar .btn-ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .3); }
+.order-bar .btn-ghost:hover { border-color: #fff; color: #fff; }
+.order-bar .btn-primary { background: var(--gold); color: var(--navy); }
+.order-bar .btn-primary:hover { background: #ffd633; color: var(--navy); }
+.order-bar .btn[disabled] { opacity: .6; cursor: progress; }
+@keyframes bar-in { from { opacity: 0; transform: translateY(14px); } }
+
 /* a labelled line under position 6 (footer) and 16 (home page): rows slide past it while dragging */
 .order-table tr.order-mark td { padding: 0 18px 0 62px; border-bottom: 1px solid var(--line-soft); background: var(--soft); }
 .order-table tbody tr.order-mark:hover { background: none; }
